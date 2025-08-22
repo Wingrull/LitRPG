@@ -1,7 +1,13 @@
 from rest_framework import serializers
-from .models import Series, Book, Review, Rating
+from .models import Series, Book, Review, Rating, Genre
 
 import base64
+
+
+class GenreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Genre
+        fields = ['id', 'name']
 
 
 class BookSerializer(serializers.ModelSerializer):
@@ -20,6 +26,7 @@ class BookSerializer(serializers.ModelSerializer):
 
 class SeriesSerializer(serializers.ModelSerializer):
     books = BookSerializer(many=True, read_only=True)
+    genres = GenreSerializer(many=True, read_only=True)
     book_count = serializers.ReadOnlyField()
     average_rating = serializers.ReadOnlyField()
     cover_image = serializers.SerializerMethodField()
@@ -33,7 +40,7 @@ class SeriesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Series
         fields = ['id', 'title', 'author', 'description', 'is_completed', 'added_at', 'book_count', 'average_rating',
-                  'books', 'cover_image']
+                  'books', 'cover_image', 'genres']
 
 
 class ReviewSerializer(serializers.ModelSerializer):

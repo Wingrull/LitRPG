@@ -20,8 +20,11 @@
                     {% if series.cover_image %}
                         <img src="data:{{ series.cover_content_type }};base64,{{ series.cover_image | b64encode }}" alt="{{ series.title }} обложка">
                     {% endif %}
-                    {{ series.title }} ({{ series.author }}) - Книг: {{ series.book_count }},
-                    Рейтинг: {{ series.average_rating|default:"Нет рейтинга" }}
+                    {{ series.title }} ({{ series.author }})
+                    {% if series.genres.all %}
+                        - Жанры: {% for genre in series.genres.all %}{{ genre.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                    {% endif %}
+                    - Книг: {{ series.book_count }}, Рейтинг: {{ series.average_rating|default:"Нет рейтинга" }}
                     {% if series.is_completed %}(Завершена){% endif %}
                 </a>
             </li>

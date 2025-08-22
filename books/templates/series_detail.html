@@ -18,6 +18,9 @@
         <img src="data:{{ series.cover_content_type }};base64,{{ series.cover_image | b64encode }}" alt="{{ series.title }} обложка">
     {% endif %}
     <p>{{ series.description }}</p>
+    {% if series.genres.all %}
+        <p>Жанры: {% for genre in series.genres.all %}{{ genre.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+    {% endif %}
     <p>Книг: {{ series.book_count }} | Рейтинг: {{ series.average_rating|default:"Нет рейтинга" }} |
        {{ series.is_completed|yesno:"Завершена,Не завершена" }}</p>
     <p>Добавлена: {{ series.added_at }}</p>
