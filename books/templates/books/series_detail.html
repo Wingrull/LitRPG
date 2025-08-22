@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ series.title }}</title>
+</head>
+<body>
+    <h1>{{ series.title }} by {{ series.author }}</h1>
+    <p>{{ series.description }}</p>
+    <p>Книг: {{ series.book_count }} | Средний рейтинг: {{ series.average_rating }} | {% if series.is_completed %}Завершена{% endif %}</p>
+    <p>Добавлена: {{ series.added_at }}</p>
+
+    <h2>Книги в серии</h2>
+    <ul>
+        {% for book in books %}
+            <li>{{ book.title }} (№{{ book.order_in_series }}) - {{ book.publication_year }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Рейтинги</h2>
+    <ul>
+        {% for rating in series.ratings.all %}
+            <li>{{ rating.value }} от {{ rating.user.username }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Отзывы</h2>
+    <ul>
+        {% for review in series.reviews.all %}
+            <li>{{ review.text }} ({{ review.user.username }})</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
