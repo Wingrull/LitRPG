@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ series.title }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        img { max-width: 200px; height: auto; margin-bottom: 10px; }
+        .book-img { max-width: 80px; height: auto; vertical-align: middle; margin-right: 10px; }
+        ul { list-style-type: none; padding: 0; }
+        li { margin: 10px 0; }
+    </style>
+</head>
+<body>
+    {% load custom_filters %}
+    <h1>{{ series.title }} by {{ series.author }}</h1>
+    {% if series.cover_image %}
+        <img src="data:{{ series.cover_content_type }};base64,{{ series.cover_image | b64encode }}" alt="{{ series.title }} обложка">
+    {% endif %}
+    <p>{{ series.description }}</p>
+    <p>Книг: {{ series.book_count }} | Рейтинг: {{ series.average_rating|default:"Нет рейтинга" }} |
+       {{ series.is_completed|yesno:"Завершена,Не завершена" }}</p>
+    <p>Добавлена: {{ series.added_at }}</p>
+
+    <h2>Книги</h2>
+    <ul>
+        {% for book in series.books.all %}
+            <li>
+                {% if book.cover_image %}
+                    <img class="book-img" src="data:{{ book.cover_content_type }};base64,{{ book.cover_image | b64encode }}" alt="{{ book.title }} обложка">
+                {% endif %}
+                {{ book.title }} (№{{ book.order_in_series }}) - {{ book.publication_year }}
+            </li>
+        {% empty %}
+            <li>Книги отсутствуют</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Отзывы</h2>
+    <ul>
+        {% for review in series.reviews.all %}
+            <li>{{ review.text }} ({{ review.user.username }})</li>
+        {% empty %}
+            <li>Отзывы отсутствуют</li>
+        {% endfor %}
+    </ul>
+
+    <a href="{% url 'series_list' %}">Назад к списку серий</a>
+</body>
+</html>

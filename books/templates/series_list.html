@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Библиотека LitRPG</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        ul { list-style-type: none; padding: 0; }
+        li { margin: 15px 0; }
+        img { max-width: 100px; height: auto; vertical-align: middle; margin-right: 10px; }
+    </style>
+</head>
+<body>
+    {% load custom_filters %}
+    <h1>Библиотека LitRPG</h1>
+    <ul>
+        {% for series in series_list %}
+            <li>
+                <a href="{% url 'series_detail' series.id %}">
+                    {% if series.cover_image %}
+                        <img src="data:{{ series.cover_content_type }};base64,{{ series.cover_image | b64encode }}" alt="{{ series.title }} обложка">
+                    {% endif %}
+                    {{ series.title }} ({{ series.author }}) - Книг: {{ series.book_count }},
+                    Рейтинг: {{ series.average_rating|default:"Нет рейтинга" }}
+                    {% if series.is_completed %}(Завершена){% endif %}
+                </a>
+            </li>
+        {% empty %}
+            <li>Серии отсутствуют</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

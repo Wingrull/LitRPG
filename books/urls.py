@@ -5,12 +5,13 @@ from .views import series_list, series_detail
 
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import SeriesViewSet, ReviewViewSet, RatingViewSet
+from . import views
 
 router = DefaultRouter()
-router.register(r'series', SeriesViewSet)
-router.register(r'reviews', ReviewViewSet)
-router.register(r'ratings', RatingViewSet)
+router.register(r'series', views.SeriesViewSet)
+router.register(r'books', views.BookViewSet)
+router.register(r'reviews', views.ReviewViewSet)
+router.register(r'ratings', views.RatingViewSet)
 
 
 urlpatterns = [
