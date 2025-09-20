@@ -8,10 +8,21 @@
         ul { list-style-type: none; padding: 0; }
         li { margin: 15px 0; }
         img { max-width: 100px; height: auto; vertical-align: middle; margin-right: 10px; }
+        .auth-links { position: absolute; top: 20px; right: 20px; }
+        .auth-links a { margin-left: 10px; }
     </style>
 </head>
 <body>
     {% load custom_filters %}
+    <div class="auth-links">
+        {% if user.is_authenticated %}
+            <span>Привет, {{ user.username }}!</span>
+            <a href="{% url 'logout' %}">Выйти</a>
+        {% else %}
+            <a href="{% url 'login' %}">Войти</a>
+            <a href="{% url 'register' %}">Регистрация</a>
+        {% endif %}
+    </div>
     <h1>Библиотека LitRPG</h1>
     <ul>
         {% for series in series_list %}
@@ -21,8 +32,10 @@
                         <img src="data:{{ series.cover_content_type }};base64,{{ series.cover_image | b64encode }}" alt="{{ series.title }} обложка">
                     {% endif %}
                     {{ series.title }} ({{ series.author }})
-                    {% if series.genres.all %}
+                    {% if series.genres.exists %}
                         - Жанры: {% for genre in series.genres.all %}{{ genre.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                    {% else %}
+                        - Жанры: Нет жанров
                     {% endif %}
                     - Книг: {{ series.book_count }}, Рейтинг: {{ series.average_rating|default:"Нет рейтинга" }}
                     {% if series.is_completed %}(Завершена){% endif %}

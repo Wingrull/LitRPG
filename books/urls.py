@@ -1,8 +1,3 @@
-from django.urls import path
-from .views import series_list, series_detail
-
-
-
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
@@ -13,9 +8,11 @@ router.register(r'books', views.BookViewSet)
 router.register(r'reviews', views.ReviewViewSet)
 router.register(r'ratings', views.RatingViewSet)
 
-
 urlpatterns = [
-    path('', series_list, name='series_list'),
-    path('series/<int:pk>/', series_detail, name='series_detail'),
+    path('', views.series_list, name='series_list'),
+    path('series/<int:pk>/', views.series_detail, name='series_detail'),
+    path('register/', views.register, name='register'),
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
     path('api/', include(router.urls)),
 ]
