@@ -1,6 +1,5 @@
 from rest_framework import serializers
-from .models import Series, Book, Review, Rating, Genre
-
+from .models import Series, Book, Review, Rating, Genre, UserSeriesStatus
 import base64
 
 
@@ -30,6 +29,7 @@ class SeriesSerializer(serializers.ModelSerializer):
     book_count = serializers.ReadOnlyField()
     average_rating = serializers.ReadOnlyField()
     cover_image = serializers.SerializerMethodField()
+    user_status = serializers.SerializerMethodField()
 
     def get_cover_image(self, obj):
         if obj.cover_image:
@@ -37,23 +37,26 @@ class SeriesSerializer(serializers.ModelSerializer):
             return f"data:{obj.cover_content_type};base64,{base64_data}"
         return None
 
+    def get_user_status(self, obj):
+        user = self.context.get('request').user
+        if user.is_authenticated:
+            status = obj.user_statuses.filter(user=user).first()
+            return status.status if status else 'UNREAD'
+        return None
+
     class Meta:
         model = Series
         fields = ['id', 'title', 'author', 'description', 'is_completed', 'added_at', 'book_count', 'average_rating',
-                  'books', 'cover_image', 'genres']
+                  'books', 'cover_image', 'genres', 'user_status']
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()  # Имя пользователя вместо ID
-
     class Meta:
         model = Review
-        fields = ['id', 'series', 'user', 'text', 'created_at']
+        fields = '__all__'
 
 
 class RatingSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()
-
     class Meta:
         model = Rating
-        fields = ['id', 'series', 'user', 'value', 'created_at']
+        fields = '__all__'

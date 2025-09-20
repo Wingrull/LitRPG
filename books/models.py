@@ -1,23 +1,23 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models import Avg  # Для вычисления среднего рейтинга
+from django.db.models import Avg
 
 
 class Genre(models.Model):
-    name = models.CharField(max_length=100, unique=True)  # Название жанра, уникальное
+    name = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
         return self.name
 
 
 class Series(models.Model):
-    title = models.CharField(max_length=200)  # Название серии
-    author = models.CharField(max_length=200)  # Автор(ы), можно сделать ManyToMany если несколько
-    description = models.TextField()  # Описание серии
-    is_completed = models.BooleanField(default=False)  # Завершена ли серия (приоритет для законченных)
-    added_at = models.DateTimeField(auto_now_add=True)  # Дата добавления на сайт
-    cover_image = models.BinaryField(null=True, blank=True)  # Бинарные данные обложки
-    cover_content_type = models.CharField(max_length=50, null=True, blank=True)  # MIME-тип, например 'image/jpeg'
+    title = models.CharField(max_length=200)
+    author = models.CharField(max_length=200)
+    description = models.TextField()
+    is_completed = models.BooleanField(default=False)
+    added_at = models.DateTimeField(auto_now_add=True)
+    cover_image = models.BinaryField(null=True, blank=True)
+    cover_content_type = models.CharField(max_length=50, null=True, blank=True)
     genres = models.ManyToManyField(Genre, related_name='series', blank=True)
 
     def __str__(self):
@@ -25,47 +25,59 @@ class Series(models.Model):
 
     @property
     def book_count(self):
-        """Вычисляемое поле: количество книг в серии"""
-        return self.books.count()  # 'books' — related_name из модели Book
+        return self.books.count()
 
     @property
     def average_rating(self):
-        """Вычисляемое поле: средний рейтинг серии"""
         avg = self.ratings.aggregate(Avg('value'))['value__avg']
         return avg if avg else 0
 
 
 class Book(models.Model):
-    series = models.ForeignKey(Series, on_delete=models.CASCADE, related_name='books')  # Связь с серией
-    title = models.CharField(max_length=200)  # Название книги
-    order_in_series = models.IntegerField(default=1)  # Порядковый номер в серии (1, 2, 3...)
-    description = models.TextField()  # Описание книги
-    publication_year = models.IntegerField()  # Год издания
+    series = models.ForeignKey(Series, related_name='books', on_delete=models.CASCADE)
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    order_in_series = models.PositiveIntegerField()
+    publication_year = models.PositiveIntegerField()
     cover_image = models.BinaryField(null=True, blank=True)
     cover_content_type = models.CharField(max_length=50, null=True, blank=True)
 
     def __str__(self):
-        return f"{self.title} (книга {self.order_in_series} в серии {self.series.title})"
+        return f"{self.title} (Series: {self.series.title})"
 
 
 class Review(models.Model):
-    series = models.ForeignKey(Series, on_delete=models.CASCADE, related_name='reviews')  # Связь с серией
+    series = models.ForeignKey(Series, related_name='reviews', on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Отзыв на серию {self.series.title} от {self.user.username}"
+        return f"Review for {self.series.title} by {self.user.username}"
 
 
 class Rating(models.Model):
-    series = models.ForeignKey(Series, on_delete=models.CASCADE, related_name='ratings')  # Связь с серией
+    series = models.ForeignKey(Series, related_name='ratings', on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    value = models.IntegerField(choices=[(i, i) for i in range(1, 6)])  # 1-5
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ('series', 'user')  # Один пользователь — один рейтинг на серию
+    value = models.PositiveSmallIntegerField()
 
     def __str__(self):
-        return f"Рейтинг {self.value} для серии {self.series.title}"
+        return f"Rating {self.value} for {self.series.title}"
+
+
+class UserSeriesStatus(models.Model):
+    STATUS_CHOICES = (
+        ('READ', 'Прочитано'),
+        ('PARTIAL', 'Не дочитал'),
+        ('UNREAD', 'Не прочитано'),
+    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='series_statuses')
+    series = models.ForeignKey(Series, on_delete=models.CASCADE, related_name='user_statuses')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='UNREAD')
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('user', 'series')  # Один пользователь — один статус для серии
+
+    def __str__(self):
+        return f"{self.user.username} - {self.series.title}: {self.get_status_display()}"

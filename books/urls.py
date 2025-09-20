@@ -11,6 +11,7 @@ router.register(r'ratings', views.RatingViewSet)
 urlpatterns = [
     path('', views.series_list, name='series_list'),
     path('series/<int:pk>/', views.series_detail, name='series_detail'),
+    path('series/<int:pk>/set-status/', views.set_series_status, name='set_series_status'),
     path('register/', views.register, name='register'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),

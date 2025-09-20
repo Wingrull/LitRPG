@@ -10,6 +10,7 @@
         img { max-width: 100px; height: auto; vertical-align: middle; margin-right: 10px; }
         .auth-links { position: absolute; top: 20px; right: 20px; }
         .auth-links a { margin-left: 10px; }
+        .filter-form { margin-bottom: 20px; }
     </style>
 </head>
 <body>
@@ -24,21 +25,40 @@
         {% endif %}
     </div>
     <h1>Библиотека LitRPG</h1>
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    {% if user.is_authenticated %}
+        <form class="filter-form" method="get">
+            <label>
+                <input type="checkbox" name="show_unread_only" {% if show_unread_only %}checked{% endif %}>
+                Показывать только не прочитанные
+            </label>
+            <button type="submit">Применить</button>
+        </form>
+    {% endif %}
     <ul>
-        {% for series in series_list %}
+        {% for item in series_with_status %}
             <li>
-                <a href="{% url 'series_detail' series.id %}">
-                    {% if series.cover_image %}
-                        <img src="data:{{ series.cover_content_type }};base64,{{ series.cover_image | b64encode }}" alt="{{ series.title }} обложка">
+                <a href="{% url 'series_detail' item.series.id %}">
+                    {% if item.series.cover_image %}
+                        <img src="data:{{ item.series.cover_content_type }};base64,{{ item.series.cover_image | b64encode }}" alt="{{ item.series.title }} обложка">
                     {% endif %}
-                    {{ series.title }} ({{ series.author }})
-                    {% if series.genres.exists %}
-                        - Жанры: {% for genre in series.genres.all %}{{ genre.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                    {{ item.series.title }} ({{ item.series.author }})
+                    {% if item.series.genres.exists %}
+                        - Жанры: {% for genre in item.series.genres.all %}{{ genre.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
                     {% else %}
                         - Жанры: Нет жанров
                     {% endif %}
-                    - Книг: {{ series.book_count }}, Рейтинг: {{ series.average_rating|default:"Нет рейтинга" }}
-                    {% if series.is_completed %}(Завершена){% endif %}
+                    - Книг: {{ item.series.book_count }}, Рейтинг: {{ item.series.average_rating|default:"Нет рейтинга" }}
+                    {% if item.series.is_completed %}(Завершена){% endif %}
+                    {% if user.is_authenticated %}
+                        - Статус: {{ item.status|default:"Не прочитано" }}
+                    {% endif %}
                 </a>
             </li>
         {% empty %}

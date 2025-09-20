@@ -11,6 +11,7 @@
         li { margin: 10px 0; }
         .auth-links { position: absolute; top: 20px; right: 20px; }
         .auth-links a { margin-left: 10px; }
+        .status-form { margin: 10px 0; }
     </style>
 </head>
 <body>
@@ -25,6 +26,13 @@
         {% endif %}
     </div>
     <h1>{{ series.title }} by {{ series.author }}</h1>
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
     {% if series.cover_image %}
         <img src="data:{{ series.cover_content_type }};base64,{{ series.cover_image | b64encode }}" alt="{{ series.title }} обложка">
     {% endif %}
@@ -37,6 +45,20 @@
     <p>Книг: {{ series.book_count }} | Рейтинг: {{ series.average_rating|default:"Нет рейтинга" }} |
        {{ series.is_completed|yesno:"Завершена,Не завершена" }}</p>
     <p>Добавлена: {{ series.added_at }}</p>
+    {% if user.is_authenticated %}
+        <div class="status-form">
+            <form method="post" action="{% url 'set_series_status' series.id %}">
+                {% csrf_token %}
+                <label>Статус серии:</label>
+                <select name="status">
+                    <option value="READ" {% if user_status == 'READ' %}selected{% endif %}>Прочитано</option>
+                    <option value="PARTIAL" {% if user_status == 'PARTIAL' %}selected{% endif %}>Не дочитал</option>
+                    <option value="UNREAD" {% if user_status == 'UNREAD' or not user_status %}selected{% endif %}>Не прочитано</option>
+                </select>
+                <button type="submit">Сохранить</button>
+            </form>
+        </div>
+    {% endif %}
 
     <h2>Книги</h2>
     <ul>
