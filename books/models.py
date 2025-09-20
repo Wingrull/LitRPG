@@ -19,13 +19,10 @@ class Series(models.Model):
     cover_image = models.BinaryField(null=True, blank=True)
     cover_content_type = models.CharField(max_length=50, null=True, blank=True)
     genres = models.ManyToManyField(Genre, related_name='series', blank=True)
+    book_count = models.PositiveIntegerField(default=0, help_text="Количество книг в серии")
 
     def __str__(self):
         return self.title
-
-    @property
-    def book_count(self):
-        return self.books.count()
 
     @property
     def average_rating(self):
@@ -77,7 +74,7 @@ class UserSeriesStatus(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ('user', 'series')  # Один пользователь — один статус для серии
+        unique_together = ('user', 'series')
 
     def __str__(self):
         return f"{self.user.username} - {self.series.title}: {self.get_status_display()}"

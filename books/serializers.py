@@ -26,7 +26,6 @@ class BookSerializer(serializers.ModelSerializer):
 class SeriesSerializer(serializers.ModelSerializer):
     books = BookSerializer(many=True, read_only=True)
     genres = GenreSerializer(many=True, read_only=True)
-    book_count = serializers.ReadOnlyField()
     average_rating = serializers.ReadOnlyField()
     cover_image = serializers.SerializerMethodField()
     user_status = serializers.SerializerMethodField()
